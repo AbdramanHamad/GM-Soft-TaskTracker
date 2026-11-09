@@ -1,0 +1,215 @@
+# GM-Soft TaskTracker
+
+### Application web de gestion des projets et des tâches
+
+Application web développée avec **Python, Flask et MySQL** dans le cadre d'un stage d'initiation effectué chez **GM-Soft**.
+
+---
+
+## Présentation du projet
+
+**GM-Soft TaskTracker** est une application web conçue pour faciliter la gestion et le suivi des projets et des tâches au sein d'une organisation.
+
+Elle permet aux administrateurs de gérer les utilisateurs, les projets et les tâches, tandis que les utilisateurs simples peuvent consulter les informations auxquelles ils ont accès.
+
+L'application dispose également d'un tableau de bord permettant de visualiser différents indicateurs relatifs à l'activité.
+
+## Objectifs
+
+- Faciliter la gestion des projets.
+- Organiser et suivre les tâches.
+- Centraliser les informations dans une base de données.
+- Gérer les utilisateurs selon leurs rôles.
+- Visualiser les statistiques à travers un tableau de bord.
+- Mettre en pratique les compétences en développement web et en gestion de bases de données.
+
+## Fonctionnalités principales
+
+### 1. Authentification et gestion des accès
+- Connexion et déconnexion des utilisateurs.
+- Gestion des sessions.
+- Hachage des mots de passe.
+- Gestion des rôles : ADMIN et UTILISATEUR.
+- Protection des fonctionnalités selon les autorisations.
+
+### 2. Tableau de bord
+- Nombre total de projets.
+- Nombre total de tâches.
+- Nombre de tâches terminées.
+- Nombre de tâches en cours.
+- Nombre de tâches en retard.
+- Nombre total d'utilisateurs.
+- Répartition des tâches par statut et par projet.
+
+### 3. Gestion des projets
+- Consultation de la liste des projets.
+- Recherche de projets.
+- Création de projets.
+- Modification des informations.
+- Gestion des statuts des projets.
+
+### 4. Gestion des tâches
+- Création et consultation des tâches.
+- Modification et suppression des tâches.
+- Attribution des tâches aux utilisateurs.
+- Association des tâches aux projets.
+- Filtrage et recherche.
+- Suivi de l'état d'avancement.
+
+### 5. Gestion des utilisateurs
+- Consultation des utilisateurs.
+- Ajout de nouveaux utilisateurs.
+- Modification des informations.
+- Suppression des utilisateurs.
+- Attribution des rôles.
+
+## Technologies utilisées
+
+| Technologie | Utilisation |
+|---|---|
+| Python | Langage de programmation |
+| Flask | Framework web |
+| MySQL | Système de gestion de base de données |
+| SQL | Manipulation des données |
+| HTML5 | Structure des pages |
+| CSS3 | Mise en forme |
+| Bootstrap 5 | Interface utilisateur responsive |
+| JavaScript | Interactivité |
+| Jinja2 | Moteur de templates |
+| Werkzeug | Sécurité et gestion des mots de passe |
+| mysql-connector-python | Connexion à MySQL |
+| python-dotenv | Gestion des variables d'environnement |
+
+## Architecture du projet
+
+```text
+GM-SOFT-TASKTRACKER/
+│
+├── app/
+│   ├── templates/
+│   │   ├── connexion.html
+│   │   ├── tableau_de_bord.html
+│   │   ├── projets.html
+│   │   ├── taches.html
+│   │   ├── utilisateurs.html
+│   │   └── ajouter_projet.html
+│   │
+│   ├── __init__.py
+│   ├── dashboard.py
+│   ├── database.py
+│   ├── models.py
+│   └── routes.py
+│
+├── database/
+│   └── schema.sql
+│
+├── config.py
+├── requirements.txt
+├── run.py
+├── .gitignore
+└── README.md
+```
+
+## Installation et configuration
+
+### Prérequis
+
+Avant de commencer, assurez-vous de disposer des éléments suivants :
+
+- Python 3 installé.
+- MySQL Server installé et configuré.
+- Git installé.
+
+### 1. Cloner le dépôt
+
+```bash
+git clone https://github.com/AbdramanHamad/GM-Soft-TaskTracker.git
+```
+
+Accéder au dossier :
+
+```bash
+cd GM-Soft-TaskTracker
+```
+
+### 2. Créer un environnement virtuel
+
+```bash
+python -m venv .venv
+```
+
+Activer l'environnement virtuel sous Windows :
+
+```bash
+.venv\Scripts\activate
+```
+
+Sous Linux ou macOS :
+
+```bash
+source .venv/bin/activate
+```
+
+### 3. Installer les dépendances
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configurer la base de données
+
+- Démarrer le serveur MySQL.
+- Créer une base de données.
+- Exécuter le script SQL disponible dans `database/schema.sql`.
+- Configurer les paramètres de connexion dans le fichier `.env`, conformément aux variables utilisées dans `config.py`.
+
+**Important :** Les identifiants de connexion et les clés secrètes doivent rester privés. Ne publiez jamais votre fichier `.env`.
+
+### 5. Lancer l'application
+
+```bash
+python run.py
+```
+
+Ouvrir ensuite le navigateur et accéder à l'adresse locale configurée par l'application, généralement :
+
+```text
+http://127.0.0.1:5000
+```
+
+## Gestion des rôles
+
+L'application distingue deux types d'utilisateurs :
+
+| Rôle | Autorisations |
+|---|---|
+| ADMIN | Gestion des utilisateurs, projets et tâches |
+| UTILISATEUR | Consultation des projets et des tâches |
+
+## Sécurité
+
+Le projet intègre plusieurs mécanismes de sécurité :
+
+- Authentification des utilisateurs.
+- Hachage des mots de passe avec Werkzeug.
+- Gestion des sessions Flask.
+- Contrôle des autorisations selon les rôles.
+- Utilisation de variables d'environnement pour les informations sensibles.
+
+## Contexte de réalisation
+
+Ce projet a été réalisé individuellement dans le cadre d'un **stage d'initiation de quatre semaines chez GM-Soft**, dans le domaine du développement informatique.
+
+Il a permis de mettre en pratique les connaissances acquises en programmation Python, développement web, conception de bases de données et gestion des applications.
+
+## Auteur
+
+**ABDRAMAN MAHAMAT AHMAT**
+
+Étudiant en deuxième année DUT  
+Filière : Ingénierie des Données et Intelligence Artificielle (IDIA)  
+École Supérieure de Technologie de Béni Mellal
+
+## Licence
+
+Projet académique réalisé dans le cadre d'un stage d'initiation chez GM-Soft.
