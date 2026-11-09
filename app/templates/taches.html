@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tâches | GM-Soft TaskTracker</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+          rel="stylesheet">
+
+    <style>
+        :root {
+            --bleu: #0875e1;
+            --marine: #173b67;
+            --fond: #f4f7fb;
+            --texte: #243247;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--fond);
+            color: var(--texte);
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+        }
+
+        /* Barre supérieure */
+        .topbar {
+            height: 43px;
+            background: var(--bleu);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,.12);
+        }
+
+        .brand { font-size: 15px; font-weight: bold; }
+
+        .user-menu { position: relative; }
+
+        .user-button {
+            background: transparent;
+            border: 0;
+            color: white;
+            padding: 7px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .user-button:hover { background: rgba(255,255,255,.15); }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            min-width: 150px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 5px 18px rgba(0,0,0,.15);
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 10px 13px;
+            color: #26364b;
+            text-decoration: none;
+        }
+
+        .user-dropdown a:hover { background: #eef4fb; }
+        .user-menu.open .user-dropdown { display: block; }
+
+        /* Mise en page */
+        .app-layout {
+            display: flex;
+            min-height: calc(100vh - 43px);
+        }
+
+        /* Menu latéral */
+        .sidebar {
+            width: 205px;
+            flex-shrink: 0;
+            background: var(--marine);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 17px 10px;
+        }
+
+        .sidebar-brand {
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1.5;
+            padding: 5px 10px 25px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #e5edf8;
+            text-decoration: none;
+            padding: 11px 10px;
+            margin-bottom: 4px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: var(--bleu);
+            color: white;
+        }
+
+        .sidebar .logout { margin-top: auto; }
+
+        /* Contenu */
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            padding: 22px;
+        }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .page-heading h1 {
+            color: #172b4d;
+            font-size: 23px;
+            font-weight: bold;
+            margin: 0 0 5px;
+        }
+
+        .page-heading p {
+            color: #778397;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .btn-primary {
+            background: var(--bleu);
+            border-color: var(--bleu);
+        }
+
+        .btn-primary:hover {
+            background: #0865bd;
+            border-color: #0865bd;
+        }
+
+        /* Panneaux */
+        .panel {
+            background: white;
+            border-radius: 9px;
+            padding: 17px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.045);
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0;
+            color: #243247;
+        }
+
+        .panel-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        /* Recherche et filtres */
+        .filter-label {
+            display: block;
+            color: #536176;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .form-control,
+        .form-select {
+            border-color: #dbe3ed;
+            border-radius: 6px;
+            font-size: 12px;
+            min-height: 37px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #6b91bd;
+            box-shadow: 0 0 0 .2rem rgba(8,117,225,.12);
+        }
+
+        /* Tableau */
+        .table-responsive { border-radius: 6px; }
+
+        .table {
+            margin-bottom: 0;
+            vertical-align: middle;
+            font-size: 11px;
+        }
+
+        .table thead th {
+            background: #f5f7fa;
+            color: #596579;
+            font-weight: bold;
+            white-space: nowrap;
+            padding: 11px 9px;
+            border-bottom: 1px solid #e6ebf1;
+        }
+
+        .table tbody td {
+            padding: 11px 9px;
+            color: #39465a;
+        }
+
+        .task-title {
+            min-width: 130px;
+            color: #26364b;
+            font-weight: 600;
+        }
+
+        .task-description {
+            display: block;
+            max-width: 190px;
+            margin-top: 4px;
+            color: #778397;
+            font-weight: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .status-todo {
+            background: #ffe0e5;
+            color: #b4233a;
+        }
+
+        .status-progress {
+            background: #fff0c2;
+            color: #8b6200;
+        }
+
+        .status-done {
+            background: #d8f7e7;
+            color: #147849;
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .action-btn {
+            width: 29px;
+            height: 29px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .action-view { background: #0875e1; }
+        .action-edit { background: #f4a623; }
+        .action-delete { background: #e9435b; }
+
+        .action-btn:hover { opacity: .82; color: white; }
+
+        .table-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+            color: #778397;
+            font-size: 11px;
+        }
+
+        .empty-message {
+            padding: 25px !important;
+            color: #778397 !important;
+            text-align: center;
+        }
+
+        /* Fenêtres modales */
+        .modal-dialog {
+            margin: 1rem auto;
+        }
+
+        .modal-dialog-scrollable {
+            height: calc(100% - 2rem);
+            max-height: calc(100vh - 2rem);
+        }
+
+        .modal-dialog-scrollable .modal-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-height: 100%;
+            overflow: hidden;
+            border: 0;
+            border-radius: 10px;
+        }
+
+        .modal-dialog-scrollable .modal-content > form {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            flex-shrink: 0;
+            background: #f4f7fb;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .modal-footer {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: #fafbfd;
+            border-top: 1px solid #e2e8f0;
+            padding: 13px 18px;
+        }
+
+        .modal .form-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #39465a;
+        }
+
+        .modal textarea.form-control { min-height: 85px; }
+
+        @media (max-width: 767px) {
+            .app-layout { flex-direction: column; }
+
+            .sidebar {
+                width: 100%;
+                min-height: auto;
+                padding: 10px;
+            }
+
+            .sidebar-brand { padding: 5px 8px 12px; }
+            .sidebar .logout { margin-top: 5px; }
+
+            .main-content { padding: 16px 12px; }
+
+            .page-heading h1 { font-size: 20px; }
+
+            .modal-dialog {
+                margin: .5rem;
+            }
+
+            .modal-dialog-scrollable {
+                height: calc(100% - 1rem);
+                max-height: calc(100vh - 1rem);
+            }
+
+            .modal-footer { padding: 10px; }
+        }
+    
+        /* Harmonisation avec le tableau de bord */
+        .topbar {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: 64px; padding: 0 28px; z-index: 1030;
+            background: var(--bleu-principal, #0875e1);
+        }
+        .brand { display:flex; align-items:center; gap:11px; color:white;
+            text-decoration:none; font-size:19px; font-weight:700; }
+        .brand i { font-size:25px; }
+        .dropdown .user-dropdown { color:white; text-decoration:none; display:flex;
+            align-items:center; gap:10px; }
+        .user-avatar { width:35px; height:35px; border-radius:50%;
+            background:rgba(255,255,255,.2); display:flex; justify-content:center;
+            align-items:center; font-size:17px; }
+        .sidebar { position:fixed; top:64px; left:0; bottom:0; width:245px;
+            padding:25px 14px; background:var(--bleu-marine, #173b67);
+            overflow-y:auto; z-index:1020; display:block; }
+        .sidebar-title { color:#9fb5d1; font-size:11px; font-weight:700;
+            text-transform:uppercase; letter-spacing:1px; padding:0 14px; margin-bottom:15px; }
+        .sidebar a { display:flex; align-items:center; gap:13px; padding:12px 14px;
+            margin-bottom:6px; color:#d6e2f1; text-decoration:none; border-radius:8px;
+            transition:.2s; font-size:14px; }
+        .sidebar a i { font-size:18px; width:21px; }
+        .sidebar a:hover { background:rgba(255,255,255,.1); color:white; }
+        .sidebar a.active { background:var(--bleu-principal, #0875e1); color:white; font-weight:600; }
+        .sidebar-divider { border-color:rgba(255,255,255,.15); margin:20px 10px; }
+        .sidebar .logout { margin-top:0; }
+        .main-content { margin-left:245px; padding:94px 28px 30px; min-height:100vh; }
+        .page-heading, .page-header { display:flex; align-items:center; justify-content:space-between;
+            gap:15px; margin-bottom:25px; flex-wrap:wrap; }
+        .page-heading h1, .page-title { margin:0 0 6px; font-size:26px; font-weight:700; color:#18385f; }
+        .page-heading p, .page-subtitle { margin:0; color:#718096; font-size:13px; }
+        .panel { border:1px solid #e5eaf1; border-radius:12px; padding:21px;
+            box-shadow:0 4px 15px rgba(20,45,80,.04); }
+        .panel-title { color:#203b5d; font-size:16px; font-weight:700; }
+        .table thead th { padding:13px 12px; background:#f7f9fc; border-bottom:1px solid #e5eaf1;
+            color:#63738a; font-size:11px; text-transform:uppercase; letter-spacing:.3px; }
+        .table tbody td { padding:13px 12px; border-bottom:1px solid #edf1f6; color:#39465a; font-size:12px; }
+        .status-badge { border-radius:20px; padding:6px 9px; font-size:10px; font-weight:700; }
+        @media (max-width:992px) {
+            .sidebar { width:205px; }
+            .main-content { margin-left:205px; padding-left:20px; padding-right:20px; }
+        }
+        @media (max-width:768px) {
+            .topbar { height:58px; padding:0 15px; }
+            .brand { font-size:15px; }
+            .brand i { font-size:21px; }
+            .user-name-top { display:none; }
+            .sidebar { top:58px; width:65px; padding:20px 8px; }
+            .sidebar-title, .sidebar a span, .sidebar-divider { display:none; }
+            .sidebar a { justify-content:center; padding:12px 5px; }
+            .sidebar a i { width:auto; font-size:20px; }
+            .main-content { margin-left:65px; padding:82px 12px 20px; }
+            .page-heading h1, .page-title { font-size:22px; }
+        }
+        @media (max-width:480px) {
+            .main-content { padding-left:9px; padding-right:9px; }
+            .panel { padding:15px; }
+        }
+
+
+        /* Réinitialisation du menu utilisateur hérité de l'ancienne interface */
+        .topbar .dropdown > .user-dropdown {
+            display:flex; position:static; top:auto; right:auto; min-width:0;
+            width:auto; height:auto; padding:0; margin:0; overflow:visible;
+            background:transparent; border:0; border-radius:0; box-shadow:none;
+            color:white; text-decoration:none;
+        }
+        .topbar .dropdown > .user-dropdown:hover { background:transparent; color:white; }
+        .topbar .dropdown-menu { min-width:210px; }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- BARRE SUPERIEURE -->
+    <header class="topbar">
+        <a href="{{ url_for('main.tableau_de_bord') }}" class="brand">
+            <i class="bi bi-kanban-fill"></i>
+            <span>GM-Soft TaskTracker</span>
+        </a>
+
+        <div class="dropdown">
+            <a href="#"
+               class="user-dropdown dropdown-toggle"
+               data-bs-toggle="dropdown"
+               aria-expanded="false">
+
+                <div class="user-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+
+                <span class="user-name-top">
+                    {{ session.get('prenom', '') }} {{ session.get('nom', '') }}
+                </span>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                <li>
+                    <span class="dropdown-item-text small text-muted">
+                        Connecté en tant que {{ session.get('role', 'UTILISATEUR') }}
+                    </span>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-danger"
+                       href="{{ url_for('main.deconnexion') }}">
+                        <i class="bi bi-box-arrow-right me-2"></i>
+                        Déconnexion
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- MENU LATERAL -->
+    <aside class="sidebar">
+        <div class="sidebar-title">Menu principal</div>
+
+        <a href="{{ url_for('main.tableau_de_bord') }}" >
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Tableau de bord</span>
+        </a>
+
+        <a href="{{ url_for('main.projets') }}">
+            <i class="bi bi-folder-fill"></i>
+            <span>Projets</span>
+        </a>
+
+        <a href="{{ url_for('main.taches') }}" class="active">
+            <i class="bi bi-list-check"></i>
+            <span>Tâches</span>
+        </a>
+
+        {% if session.get('role') == 'ADMIN' %}
+        <a href="{{ url_for('main.utilisateurs') }}">
+            <i class="bi bi-people-fill"></i>
+            <span>Utilisateurs</span>
+        </a>
+        {% endif %}
+
+        <hr class="sidebar-divider">
+
+        <a href="{{ url_for('main.deconnexion') }}">
+            <i class="bi bi-box-arrow-left"></i>
+            <span>Déconnexion</span>
+        </a>
+    </aside>
+
+
+    <!-- CONTENU PRINCIPAL -->
+<main class="main-content">
+
+        <div class="page-heading">
+            <div>
+                <h1>Gestion des tâches</h1>
+                <p>Organisez et suivez les tâches de vos projets.</p>
+            </div>
+
+            {% if session.get('role') == 'ADMIN' %}
+            <button type="button" class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#modalAjout">
+                + Nouvelle tâche
+            </button>
+            {% endif %}
+        </div>
+
+        <!-- MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for categorie, message in messages %}
+            <div class="alert alert-{{ categorie }} alert-dismissible fade show"
+                 role="alert">
+                {{ message }}
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+            {% endfor %}
+        {% endwith %}
+
+        <!-- RECHERCHE ET FILTRES -->
+        <section class="panel">
+            <div class="panel-toolbar">
+                <h2 class="panel-title">Recherche et filtres</h2>
+                <button type="button" class="btn btn-outline-secondary btn-sm"
+                        id="reinitialiserFiltres">
+                    Réinitialiser
+                </button>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="recherche" class="filter-label">
+                        Rechercher une tâche
+                    </label>
+                    <input type="search" id="recherche" class="form-control"
+                           placeholder="Titre, description, responsable...">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="filtreStatut" class="filter-label">Statut</label>
+                    <select id="filtreStatut" class="form-select">
+                        <option value="">Tous les statuts</option>
+                        <option value="A_FAIRE">À faire</option>
+                        <option value="EN_COURS">En cours</option>
+                        <option value="TERMINE">Terminé</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="filtreProjet" class="filter-label">Projet</label>
+                    <select id="filtreProjet" class="form-select">
+                        <option value="">Tous les projets</option>
+                        {% for projet in projets %}
+                        <option value="{{ projet.id_projet }}">
+                            {{ projet.nom }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- TABLEAU DES TÂCHES -->
+        <section class="panel">
+            <div class="panel-toolbar">
+                <h2 class="panel-title">Liste des tâches</h2>
+                <span class="badge text-bg-primary" id="compteur">
+                    {{ taches|length }} tâche(s)
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover" id="tableTaches">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tâche</th>
+                            <th>Projet</th>
+                            <th>Responsable</th>
+                            <th>Date de début</th>
+                            <th>Échéance</th>
+                            <th>Statut</th>
+                            {% if session.get('role') == 'ADMIN' %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for tache in taches %}
+                        <tr class="ligne-tache"
+                            data-statut="{{ tache.statut }}"
+                            data-projet="{{ tache.id_projet }}">
+
+                            <td>{{ tache.id_tache }}</td>
+
+                            <td class="task-title">
+                                {{ tache.titre }}
+                                {% if tache.description %}
+                                <span class="task-description">
+                                    {{ tache.description }}
+                                </span>
+                                {% endif %}
+                            </td>
+
+                            <td>{{ tache.nom_projet }}</td>
+                            <td>{{ tache.nom_utilisateur }}</td>
+                            <td>{{ tache.date_debut or '—' }}</td>
+                            <td>{{ tache.date_echeance or '—' }}</td>
+
+                            <td>
+                                {% if tache.statut == 'TERMINE' %}
+                                <span class="status-badge status-done">Terminé</span>
+                                {% elif tache.statut == 'EN_COURS' %}
+                                <span class="status-badge status-progress">En cours</span>
+                                {% else %}
+                                <span class="status-badge status-todo">À faire</span>
+                                {% endif %}
+                            </td>
+
+                            {% if session.get('role') == 'ADMIN' %}
+                            <td>
+                                <div class="action-buttons">
+                                    <button type="button"
+                                            class="action-btn action-view"
+                                            title="Consulter"
+                                            aria-label="Consulter la tâche"
+                                            data-titre="{{ tache.titre }}"
+                                            data-description="{{ tache.description or 'Aucune description' }}"
+                                            data-projet="{{ tache.nom_projet }}"
+                                            data-responsable="{{ tache.nom_utilisateur }}"
+                                            data-debut="{{ tache.date_debut or 'Non définie' }}"
+                                            data-echeance="{{ tache.date_echeance or 'Non définie' }}"
+                                            data-statut="{{ tache.statut }}"
+                                            onclick="consulterTache(this)">
+                                        👁
+                                    </button>
+
+                                    <button type="button"
+                                            class="action-btn action-edit"
+                                            title="Modifier"
+                                            aria-label="Modifier la tâche"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalModification{{ tache.id_tache }}">
+                                        ✏
+                                    </button>
+
+                                    <form method="POST"
+                                          action="{{ url_for('main.supprimer_tache', id_tache=tache.id_tache) }}"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Voulez-vous vraiment supprimer cette tâche ? Cette action est irréversible.');">
+                                        <button type="submit"
+                                                class="action-btn action-delete"
+                                                title="Supprimer"
+                                                aria-label="Supprimer la tâche">
+                                            🗑
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% else %}
+                        <tr id="ligneVide">
+                            <td colspan="{{ 8 if session.get('role') == 'ADMIN' else 7 }}"
+                                class="empty-message">
+                                Aucune tâche enregistrée pour le moment.
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        <tr id="aucunResultat" style="display:none;">
+                            <td colspan="{{ 8 if session.get('role') == 'ADMIN' else 7 }}"
+                                class="empty-message">
+                                Aucune tâche ne correspond aux filtres sélectionnés.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-footer">
+                <span id="texteCompteur">
+                    {{ taches|length }} tâche(s) au total
+                </span>
+                <span>GM-Soft TaskTracker</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALE DE CONSULTATION -->
+<div class="modal fade" id="modalConsultation" tabindex="-1"
+     aria-labelledby="titreConsultation" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header">
+                <h5 class="modal-title fs-6" id="titreConsultation">
+                    Détails de la tâche
+                </h5>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+
+            <div class="modal-body">
+                <p><strong>Titre :</strong> <span id="detailTitre"></span></p>
+                <p><strong>Description :</strong> <span id="detailDescription"></span></p>
+                <p><strong>Projet :</strong> <span id="detailProjet"></span></p>
+                <p><strong>Responsable :</strong> <span id="detailResponsable"></span></p>
+                <p><strong>Date de début :</strong> <span id="detailDebut"></span></p>
+                <p><strong>Échéance :</strong> <span id="detailEcheance"></span></p>
+                <p class="mb-0"><strong>Statut :</strong> <span id="detailStatut"></span></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODALE D'AJOUT -->
+{% if session.get('role') == 'ADMIN' %}
+<div class="modal fade" id="modalAjout" tabindex="-1"
+     aria-labelledby="titreModalAjout" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('main.ajouter_tache') }}">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="titreModalAjout">
+                        Ajouter une tâche
+                    </h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="titre" class="form-label">Titre de la tâche *</label>
+                        <input type="text" class="form-control" id="titre"
+                               name="titre" maxlength="150" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description"
+                                  name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_projet" class="form-label">Projet *</label>
+                        <select class="form-select" id="id_projet"
+                                name="id_projet" required>
+                            <option value="">Sélectionnez un projet</option>
+                            {% for projet in projets %}
+                            <option value="{{ projet.id_projet }}">
+                                {{ projet.nom }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_utilisateur" class="form-label">
+                            Utilisateur responsable *
+                        </label>
+                        <select class="form-select" id="id_utilisateur"
+                                name="id_utilisateur" required>
+                            <option value="">Sélectionnez un utilisateur</option>
+                            {% for utilisateur in utilisateurs %}
+                            <option value="{{ utilisateur.id_utilisateur }}">
+                                {{ utilisateur.prenom }} {{ utilisateur.nom }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="date_debut" class="form-label">Date de début</label>
+                            <input type="date" class="form-control"
+                                   id="date_debut" name="date_debut">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="date_echeance" class="form-label">
+                                Date d'échéance
+                            </label>
+                            <input type="date" class="form-control"
+                                   id="date_echeance" name="date_echeance">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="statut" class="form-label">Statut</label>
+                        <select class="form-select" id="statut" name="statut">
+                            <option value="A_FAIRE">À faire</option>
+                            <option value="EN_COURS">En cours</option>
+                            <option value="TERMINE">Terminé</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">
+                        Enregistrer la tâche
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODALES DE MODIFICATION -->
+{% for tache in taches %}
+<div class="modal fade" id="modalModification{{ tache.id_tache }}"
+     tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <form method="POST"
+                  action="{{ url_for('main.modifier_tache', id_tache=tache.id_tache) }}">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Modifier la tâche : {{ tache.titre }}
+                    </h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Titre *</label>
+                        <input type="text" class="form-control" name="titre"
+                               maxlength="150" value="{{ tache.titre }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description"
+                                  rows="3">{{ tache.description or '' }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Projet *</label>
+                        <select class="form-select" name="id_projet" required>
+                            {% for projet in projets %}
+                            <option value="{{ projet.id_projet }}"
+                                {% if projet.id_projet == tache.id_projet %}selected{% endif %}>
+                                {{ projet.nom }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Responsable *</label>
+                        <select class="form-select" name="id_utilisateur" required>
+                            {% for utilisateur in utilisateurs %}
+                            <option value="{{ utilisateur.id_utilisateur }}"
+                                {% if utilisateur.id_utilisateur == tache.id_utilisateur %}selected{% endif %}>
+                                {{ utilisateur.prenom }} {{ utilisateur.nom }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date de début</label>
+                            <input type="date" class="form-control"
+                                   name="date_debut"
+                                   value="{{ tache.date_debut or '' }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date d'échéance</label>
+                            <input type="date" class="form-control"
+                                   name="date_echeance"
+                                   value="{{ tache.date_echeance or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Statut</label>
+                        <select class="form-select" name="statut">
+                            <option value="A_FAIRE"
+                                {% if tache.statut == 'A_FAIRE' %}selected{% endif %}>
+                                À faire
+                            </option>
+                            <option value="EN_COURS"
+                                {% if tache.statut == 'EN_COURS' %}selected{% endif %}>
+                                En cours
+                            </option>
+                            <option value="TERMINE"
+                                {% if tache.statut == 'TERMINE' %}selected{% endif %}>
+                                Terminé
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">
+                        Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Menu utilisateur
+    const userButton = document.getElementById("userButton");
+    const userMenu = document.getElementById("userMenu");
+
+    userButton.addEventListener("click", function () {
+        const ouvert = userMenu.classList.toggle("open");
+        userButton.setAttribute("aria-expanded", ouvert);
+    });
+
+    document.addEventListener("click", function (event) {
+        if (!userMenu.contains(event.target)) {
+            userMenu.classList.remove("open");
+            userButton.setAttribute("aria-expanded", "false");
+        }
+    });
+
+    // Recherche et filtres
+    const recherche = document.getElementById("recherche");
+    const filtreStatut = document.getElementById("filtreStatut");
+    const filtreProjet = document.getElementById("filtreProjet");
+    const compteur = document.getElementById("compteur");
+    const texteCompteur = document.getElementById("texteCompteur");
+    const aucunResultat = document.getElementById("aucunResultat");
+    const lignes = Array.from(document.querySelectorAll(".ligne-tache"));
+
+    function filtrerTaches() {
+        const texte = recherche.value.toLowerCase().trim();
+        const statut = filtreStatut.value;
+        const projet = filtreProjet.value;
+        let visibles = 0;
+
+        lignes.forEach(function (ligne) {
+            const correspondTexte =
+                ligne.textContent.toLowerCase().includes(texte);
+            const correspondStatut =
+                !statut || ligne.dataset.statut === statut;
+            const correspondProjet =
+                !projet || ligne.dataset.projet === projet;
+
+            const afficher =
+                correspondTexte && correspondStatut && correspondProjet;
+
+            ligne.style.display = afficher ? "" : "none";
+
+            if (afficher) visibles++;
+        });
+
+        compteur.textContent = visibles + " tâche(s)";
+        texteCompteur.textContent =
+            visibles + " tâche(s) affichée(s) sur " + lignes.length;
+
+        aucunResultat.style.display =
+            visibles === 0 && lignes.length > 0 ? "" : "none";
+    }
+
+    recherche.addEventListener("input", filtrerTaches);
+    filtreStatut.addEventListener("change", filtrerTaches);
+    filtreProjet.addEventListener("change", filtrerTaches);
+
+    document.getElementById("reinitialiserFiltres")
+        .addEventListener("click", function () {
+            recherche.value = "";
+            filtreStatut.value = "";
+            filtreProjet.value = "";
+            filtrerTaches();
+        });
+
+    // Consultation d'une tâche
+    function consulterTache(bouton) {
+        document.getElementById("detailTitre").textContent =
+            bouton.dataset.titre;
+        document.getElementById("detailDescription").textContent =
+            bouton.dataset.description;
+        document.getElementById("detailProjet").textContent =
+            bouton.dataset.projet;
+        document.getElementById("detailResponsable").textContent =
+            bouton.dataset.responsable;
+        document.getElementById("detailDebut").textContent =
+            bouton.dataset.debut;
+        document.getElementById("detailEcheance").textContent =
+            bouton.dataset.echeance;
+        document.getElementById("detailStatut").textContent =
+            bouton.dataset.statut;
+
+        bootstrap.Modal.getOrCreateInstance(
+            document.getElementById("modalConsultation")
+        ).show();
+    }
+
+    // Initialisation du compteur
+    filtrerTaches();
+</script>
+
+</body>
+</html>

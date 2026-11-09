@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tableau de bord | GM-Soft TaskTracker</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+          rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bleu-principal: #0875e1;
+            --bleu-marine: #173b67;
+            --fond: #f4f7fb;
+            --texte: #26364b;
+            --texte-secondaire: #718096;
+            --bordure: #e5eaf1;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--fond);
+            color: var(--texte);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+        }
+
+        /* BARRE SUPERIEURE */
+
+        .topbar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 64px;
+            background: var(--bleu-principal);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            color: white;
+            z-index: 1030;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            color: white;
+            text-decoration: none;
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .brand i {
+            font-size: 25px;
+        }
+
+        .user-dropdown {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-dropdown:hover {
+            color: white;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 17px;
+        }
+
+        /* MENU LATERAL */
+
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            width: 245px;
+            padding: 25px 14px;
+            background: var(--bleu-marine);
+            overflow-y: auto;
+            z-index: 1020;
+        }
+
+        .sidebar-title {
+            color: #9fb5d1;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 14px;
+            margin-bottom: 15px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 12px 14px;
+            margin-bottom: 6px;
+            color: #d6e2f1;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: .2s;
+        }
+
+        .sidebar a i {
+            font-size: 18px;
+            width: 21px;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, .1);
+            color: white;
+        }
+
+        .sidebar a.active {
+            background: var(--bleu-principal);
+            color: white;
+            font-weight: 600;
+        }
+
+        .sidebar-divider {
+            border-color: rgba(255, 255, 255, .15);
+            margin: 20px 10px;
+        }
+
+        /* CONTENU */
+
+        .main-content {
+            margin-left: 245px;
+            padding: 94px 28px 30px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .page-title {
+            margin: 0 0 6px;
+            font-size: 26px;
+            font-weight: 700;
+            color: #18385f;
+        }
+
+        .page-subtitle {
+            margin: 0;
+            color: var(--texte-secondaire);
+            font-size: 13px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 20px;
+            background: #e5f8ed;
+            color: #16804a;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* CARTES STATISTIQUES */
+
+        .stat-card {
+            position: relative;
+            height: 100%;
+            min-height: 142px;
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(20, 45, 80, .07);
+            overflow: hidden;
+        }
+
+        .stat-blue {
+            background: linear-gradient(135deg, #0875e1, #3698f3);
+        }
+
+        .stat-green {
+            background: linear-gradient(135deg, #159568, #31bd88);
+        }
+
+        .stat-orange {
+            background: linear-gradient(135deg, #e99209, #ffc044);
+        }
+
+        .stat-red {
+            background: linear-gradient(135deg, #dc3545, #f16b79);
+        }
+
+        .stat-purple {
+            background: linear-gradient(135deg, #6952cb, #9784f2);
+        }
+
+        .stat-teal {
+            background: linear-gradient(135deg, #078b9d, #25b8c6);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 500;
+            opacity: .95;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 31px;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+
+        .stat-link {
+            color: white;
+            text-decoration: none;
+            font-size: 11px;
+        }
+
+        .stat-link:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 18px;
+            top: 17px;
+            font-size: 28px;
+            opacity: .25;
+        }
+
+        /* PANNEAUX */
+
+        .panel {
+            height: 100%;
+            background: white;
+            border: 1px solid var(--bordure);
+            border-radius: 12px;
+            padding: 21px;
+            box-shadow: 0 4px 15px rgba(20, 45, 80, .04);
+        }
+
+        .panel-title {
+            margin: 0 0 6px;
+            color: #203b5d;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .panel-subtitle {
+            margin-bottom: 20px;
+            color: var(--texte-secondaire);
+            font-size: 12px;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 270px;
+        }
+
+        .chart-empty {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: var(--texte-secondaire);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* TABLEAU DES TACHES */
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .table {
+            margin: 0;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table thead th {
+            padding: 13px 12px;
+            background: #f7f9fc;
+            border-bottom: 1px solid var(--bordure);
+            color: #63738a;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        .table tbody td {
+            padding: 13px 12px;
+            border-bottom: 1px solid #edf1f6;
+            color: #39465a;
+            font-size: 12px;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: #263f5f;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .status-a-faire {
+            color: #b4233a;
+            background: #ffe7eb;
+        }
+
+        .status-en-cours {
+            color: #1761a8;
+            background: #e5f1ff;
+        }
+
+        .status-termine {
+            color: #147849;
+            background: #dff7e9;
+        }
+
+        .status-autre {
+            color: #765400;
+            background: #fff1c9;
+        }
+
+        .empty-message {
+            padding: 30px 15px !important;
+            color: var(--texte-secondaire) !important;
+            text-align: center;
+        }
+
+        .welcome-card {
+            margin-top: 22px;
+            padding: 21px;
+            background: white;
+            border: 1px solid var(--bordure);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(20, 45, 80, .04);
+        }
+
+        .welcome-card h2 {
+            margin-bottom: 7px;
+            font-size: 17px;
+            font-weight: 700;
+            color: #203b5d;
+        }
+
+        .welcome-card p {
+            margin: 0;
+            color: var(--texte-secondaire);
+            font-size: 13px;
+        }
+
+        .section-spacing {
+            margin-top: 22px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 205px;
+            }
+
+            .main-content {
+                margin-left: 205px;
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                height: 58px;
+                padding: 0 15px;
+            }
+
+            .brand {
+                font-size: 15px;
+            }
+
+            .brand i {
+                font-size: 21px;
+            }
+
+            .user-name-top {
+                display: none;
+            }
+
+            .sidebar {
+                top: 58px;
+                width: 65px;
+                padding: 20px 8px;
+            }
+
+            .sidebar-title,
+            .sidebar a span,
+            .sidebar-divider {
+                display: none;
+            }
+
+            .sidebar a {
+                justify-content: center;
+                padding: 12px 5px;
+            }
+
+            .sidebar a i {
+                width: auto;
+                font-size: 20px;
+            }
+
+            .main-content {
+                margin-left: 65px;
+                padding: 82px 12px 20px;
+            }
+
+            .page-title {
+                font-size: 22px;
+            }
+
+            .stat-card {
+                min-height: 130px;
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 26px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding-left: 9px;
+                padding-right: 9px;
+            }
+
+            .panel {
+                padding: 15px;
+            }
+
+            .stat-label {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- BARRE SUPERIEURE -->
+    <header class="topbar">
+        <a href="{{ url_for('main.tableau_de_bord') }}" class="brand">
+            <i class="bi bi-kanban-fill"></i>
+            <span>GM-Soft TaskTracker</span>
+        </a>
+
+        <div class="dropdown">
+            <a href="#"
+               class="user-dropdown dropdown-toggle"
+               data-bs-toggle="dropdown"
+               aria-expanded="false">
+
+                <div class="user-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+
+                <span class="user-name-top">
+                    {{ session.get('prenom', '') }} {{ session.get('nom', '') }}
+                </span>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                <li>
+                    <span class="dropdown-item-text small text-muted">
+                        Connecté en tant que {{ session.get('role', 'UTILISATEUR') }}
+                    </span>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-danger"
+                       href="{{ url_for('main.deconnexion') }}">
+                        <i class="bi bi-box-arrow-right me-2"></i>
+                        Déconnexion
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- MENU LATERAL -->
+    <aside class="sidebar">
+        <div class="sidebar-title">Menu principal</div>
+
+        <a href="{{ url_for('main.tableau_de_bord') }}" class="active">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Tableau de bord</span>
+        </a>
+
+        <a href="{{ url_for('main.projets') }}">
+            <i class="bi bi-folder-fill"></i>
+            <span>Projets</span>
+        </a>
+
+        <a href="{{ url_for('main.taches') }}">
+            <i class="bi bi-list-check"></i>
+            <span>Tâches</span>
+        </a>
+
+        {% if session.get('role') == 'ADMIN' %}
+        <a href="{{ url_for('main.utilisateurs') }}">
+            <i class="bi bi-people-fill"></i>
+            <span>Utilisateurs</span>
+        </a>
+        {% endif %}
+
+        <hr class="sidebar-divider">
+
+        <a href="{{ url_for('main.deconnexion') }}">
+            <i class="bi bi-box-arrow-left"></i>
+            <span>Déconnexion</span>
+        </a>
+    </aside>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="main-content">
+
+        <!-- EN-TETE -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Tableau de bord</h1>
+                <p class="page-subtitle">
+                    Vue générale de votre activité et suivi de vos projets.
+                </p>
+            </div>
+
+            <span class="role-badge">
+                <i class="bi bi-shield-check me-1"></i>
+                {{ session.get('role', '') }}
+            </span>
+        </div>
+
+        <!-- CARTES STATISTIQUES -->
+        <div class="row g-3">
+
+            <div class="col-6 col-xl-4">
+                <div class="stat-card stat-blue">
+                    <i class="bi bi-folder-fill stat-icon"></i>
+                    <div class="stat-label">Total des projets</div>
+                    <div class="stat-value">
+                        {{ statistiques.total_projets }}
+                    </div>
+                    <a href="{{ url_for('main.projets') }}" class="stat-link">
+                        Voir les projets <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-6 col-xl-4">
+                <div class="stat-card stat-purple">
+                    <i class="bi bi-list-check stat-icon"></i>
+                    <div class="stat-label">Total des tâches</div>
+                    <div class="stat-value">
+                        {{ statistiques.total_taches }}
+                    </div>
+                    <a href="{{ url_for('main.taches') }}" class="stat-link">
+                        Voir les tâches <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-6 col-xl-4">
+                <div class="stat-card stat-green">
+                    <i class="bi bi-check-circle-fill stat-icon"></i>
+                    <div class="stat-label">Tâches terminées</div>
+                    <div class="stat-value">
+                        {{ statistiques.taches_terminees }}
+                    </div>
+                    <a href="{{ url_for('main.taches') }}" class="stat-link">
+                        Consulter les tâches <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-6 col-xl-4">
+                <div class="stat-card stat-orange">
+                    <i class="bi bi-arrow-repeat stat-icon"></i>
+                    <div class="stat-label">Tâches en cours</div>
+                    <div class="stat-value">
+                        {{ statistiques.taches_en_cours }}
+                    </div>
+                    <a href="{{ url_for('main.taches') }}" class="stat-link">
+                        Consulter les tâches <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-6 col-xl-4">
+                <div class="stat-card stat-red">
+                    <i class="bi bi-exclamation-triangle-fill stat-icon"></i>
+                    <div class="stat-label">Tâches en retard</div>
+                    <div class="stat-value">
+                        {{ statistiques.taches_en_retard }}
+                    </div>
+                    <a href="{{ url_for('main.taches') }}" class="stat-link">
+                        Vérifier les échéances <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-6 col-xl-4">
+                <div class="stat-card stat-teal">
+                    <i class="bi bi-people-fill stat-icon"></i>
+                    <div class="stat-label">Utilisateurs</div>
+                    <div class="stat-value">
+                        {{ statistiques.total_utilisateurs }}
+                    </div>
+                    {% if session.get('role') == 'ADMIN' %}
+                    <a href="{{ url_for('main.utilisateurs') }}" class="stat-link">
+                        Gérer les utilisateurs <i class="bi bi-arrow-right"></i>
+                    </a>
+                    {% else %}
+                    <span class="stat-link">Comptes enregistrés</span>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- GRAPHIQUES -->
+        <div class="row g-3 section-spacing">
+
+            <!-- GRAPHIQUE CIRCULAIRE -->
+            <div class="col-lg-5">
+                <section class="panel">
+                    <h2 class="panel-title">
+                        <i class="bi bi-pie-chart-fill text-primary me-2"></i>
+                        Répartition des tâches
+                    </h2>
+
+                    <p class="panel-subtitle">
+                        Répartition réelle selon le statut enregistré.
+                    </p>
+
+                    {% if statistiques.total_taches > 0 %}
+                    <div class="chart-container">
+                        <canvas id="graphiqueStatuts"
+                                aria-label="Répartition des tâches par statut"
+                                role="img"></canvas>
+                    </div>
+                    {% else %}
+                    <div class="chart-empty">
+                        <div>
+                            <i class="bi bi-pie-chart fs-1 d-block mb-2"></i>
+                            Aucune tâche à représenter pour le moment.
+                        </div>
+                    </div>
+                    {% endif %}
+                </section>
+            </div>
+
+            <!-- GRAPHIQUE PAR PROJET -->
+            <div class="col-lg-7">
+                <section class="panel">
+                    <h2 class="panel-title">
+                        <i class="bi bi-bar-chart-fill text-primary me-2"></i>
+                        Tâches par projet
+                    </h2>
+
+                    <p class="panel-subtitle">
+                        Comparaison du nombre de tâches pour les projets enregistrés.
+                    </p>
+
+                    {% if statistiques.taches_par_projet %}
+                    <div class="chart-container">
+                        <canvas id="graphiqueProjets"
+                                aria-label="Nombre de tâches par projet"
+                                role="img"></canvas>
+                    </div>
+                    {% else %}
+                    <div class="chart-empty">
+                        <div>
+                            <i class="bi bi-bar-chart fs-1 d-block mb-2"></i>
+                            Aucun projet enregistré pour le moment.
+                        </div>
+                    </div>
+                    {% endif %}
+                </section>
+            </div>
+
+        </div>
+
+        <!-- DERNIERES TACHES -->
+        <div class="section-spacing">
+            <section class="panel">
+
+                <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap mb-3">
+                    <div>
+                        <h2 class="panel-title mb-1">
+                            <i class="bi bi-clock-history text-primary me-2"></i>
+                            Dernières tâches
+                        </h2>
+                        <p class="panel-subtitle mb-0">
+                            Les cinq tâches les plus récemment enregistrées.
+                        </p>
+                    </div>
+
+                    <a href="{{ url_for('main.taches') }}"
+                       class="btn btn-primary btn-sm">
+                        Toutes les tâches
+                        <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+
+                <div class="table-container">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tâche</th>
+                                <th>Projet</th>
+                                <th>Statut</th>
+                                <th>Date d'échéance</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for tache in statistiques.dernieres_taches %}
+                            <tr>
+                                <td>
+                                    <span class="task-title">
+                                        {{ tache.titre }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ tache.nom_projet or 'Projet non renseigné' }}
+                                </td>
+
+                                <td>
+                                    {% if tache.statut == 'TERMINE' %}
+                                        <span class="status-badge status-termine">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            Terminée
+                                        </span>
+                                    {% elif tache.statut == 'EN_COURS' %}
+                                        <span class="status-badge status-en-cours">
+                                            <i class="bi bi-arrow-repeat me-1"></i>
+                                            En cours
+                                        </span>
+                                    {% elif tache.statut == 'A_FAIRE' %}
+                                        <span class="status-badge status-a-faire">
+                                            <i class="bi bi-hourglass-split me-1"></i>
+                                            À faire
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge status-autre">
+                                            {{ tache.statut }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if tache.date_echeance %}
+                                        {{ tache.date_echeance.strftime('%d/%m/%Y') }}
+                                    {% else %}
+                                        <span class="text-secondary">Non définie</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="empty-message">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                    Aucune tâche enregistrée pour le moment.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- MESSAGE DE BIENVENUE -->
+        <section class="welcome-card">
+            <h2>
+                <i class="bi bi-hand-thumbs-up text-primary me-2"></i>
+                Bienvenue {{ session.get('prenom', '') }}
+                {{ session.get('nom', '') }} !
+            </h2>
+
+            <p>
+                Suivez vos projets, consultez les indicateurs et gérez vos tâches
+                depuis votre espace GM-Soft TaskTracker.
+            </p>
+        </section>
+
+    </main>
+
+    <!-- DONNEES POUR LES GRAPHIQUES -->
+    <script>
+        const repartitionStatuts =
+            {{ statistiques.repartition_statuts | tojson }};
+
+        const tachesParProjet =
+            {{ statistiques.taches_par_projet | tojson }};
+
+        // Traduire les statuts enregistrés en libellés lisibles.
+        function libelleStatut(statut) {
+            const libelles = {
+                'A_FAIRE': 'À faire',
+                'EN_COURS': 'En cours',
+                'TERMINE': 'Terminées'
+            };
+
+            return libelles[statut] || statut;
+        }
+
+        // GRAPHIQUE CIRCULAIRE
+        const elementStatuts = document.getElementById('graphiqueStatuts');
+
+        if (elementStatuts && repartitionStatuts.length > 0) {
+            const couleursStatuts = {
+                'A_FAIRE': '#f16b79',
+                'EN_COURS': '#0875e1',
+                'TERMINE': '#20a875'
+            };
+
+            new Chart(elementStatuts, {
+                type: 'doughnut',
+
+                data: {
+                    labels: repartitionStatuts.map(
+                        item => libelleStatut(item.statut)
+                    ),
+
+                    datasets: [{
+                        data: repartitionStatuts.map(
+                            item => Number(item.total)
+                        ),
+
+                        backgroundColor: repartitionStatuts.map(
+                            item => couleursStatuts[item.statut] || '#9aa8ba'
+                        ),
+
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                        hoverOffset: 7
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 18,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const total = context.dataset.data.reduce(
+                                        (somme, valeur) => somme + valeur, 0
+                                    );
+
+                                    const valeur = context.parsed;
+                                    const pourcentage = total
+                                        ? ((valeur / total) * 100).toFixed(1)
+                                        : 0;
+
+                                    return context.label + ': ' +
+                                        valeur + ' (' + pourcentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // GRAPHIQUE DES TACHES PAR PROJET
+        const elementProjets = document.getElementById('graphiqueProjets');
+
+        if (elementProjets && tachesParProjet.length > 0) {
+            new Chart(elementProjets, {
+                type: 'bar',
+
+                data: {
+                    labels: tachesParProjet.map(
+                        projet => projet.nom_projet
+                    ),
+
+                    datasets: [{
+                        label: 'Nombre de tâches',
+
+                        data: tachesParProjet.map(
+                            projet => Number(projet.total_taches)
+                        ),
+
+                        backgroundColor: '#0875e1',
+                        borderRadius: 6,
+                        maxBarThickness: 45
+                    }]
+                },
+
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            },
+                            grid: {
+                                color: '#edf1f6'
+                            }
+                        },
+
+                        y: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return context.parsed.x + ' tâche(s)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
